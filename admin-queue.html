@@ -88,6 +88,62 @@
         h2 { font-size: 2.5rem; }
         button { font-size: 1rem; padding: 0.8rem 1.5rem; width: auto; display: inline-block; margin: 0.5rem; }
     }
+
+    .popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .popup-content {
+        background-color: #1e1e1e;
+        color: #ffffff;
+        padding: 30px 40px;
+        border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+        text-align: center;
+        max-width: 320px;
+        font-family: "Segoe UI", sans-serif;
+        animation: popupFade 0.25s ease-out;
+    }
+
+    .popup-content p {
+        margin-bottom: 20px;
+        font-size: 18px;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+
+    #popup-close {
+        background-color: #00aaff;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 18px;
+        cursor: pointer;
+        font-size: 15px;
+        transition: background-color 0.2s;
+    }
+
+    #popup-close:hover {
+        background-color: #0088cc;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    @keyframes popupFade {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
     </style>
 </head>
 <body>
@@ -104,6 +160,12 @@
     <button id="nextBtn">➡️ Prossimo</button>
     <button class="reset" id="updateBtn">🔁 Aggiorna</button>
     <button class="reset" id="resetBtn">🔁 Reset</button>
+  </div>
+  <div id="popup" class="popup hidden">
+    <div class="popup-content">
+        <p id="popup-message"></p>
+        <button id="popup-close">OK</button>
+    </div>
   </div>
 
   <script>
@@ -140,9 +202,26 @@
         totalPlayers.textContent = data.TotalPlayers;
     }
 
+    function showPopup(message) {
+        const popup = document.getElementById("popup");
+        const msg = document.getElementById("popup-message");
+        msg.textContent = message;
+        popup.classList.remove("hidden");
+
+        document.getElementById("popup-close").onclick = () => {
+                popup.classList.add("hidden");
+        };
+    }
+
     async function nextNumber() {
         const game = gameSelect.value;
         if (!game) return;
+
+        if (parseInt(currentPlayer.textContent) >= parseInt(totalPlayers.textContent)) {
+            showPopup("Non ci sono ulteriori persone in fila");
+            return;
+        }
+
         const res = await fetch(`${backendUrl}/api/queue/next?game=${game}`, { method: "POST" });
         const data = await res.json();
         currentPlayer.textContent = data.currentPlayer;
@@ -158,9 +237,9 @@
     }
 
     socket.on("newPlayer", data => {
-      if (data.game === gameTitle.textContent) {
-        totalNumber.textContent = data.currentPlayer;
-      }
+        if (data.game === gameSelect.value) {
+            totalPlayers.textContent = data.totalPlayers;
+        }
     });
 
     loadStatus();

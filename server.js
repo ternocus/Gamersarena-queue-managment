@@ -59,7 +59,7 @@ app.post("/api/queue/reset", (req, res) => {
   q.currentPlayer = 0;
   q.TotalPlayers = 0;
 
-  io.emit("queueUpdate", { game, currentPlayer: 0, reset: true });
+  io.emit("resetQueue", { game, currentPlayer: 0, reset: true });
   res.json({ game, currentPlayer: 0, TotalPlayers: 0 });
 });
 
