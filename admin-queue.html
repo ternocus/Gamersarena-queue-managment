@@ -96,12 +96,13 @@
     <h1>Gestione Fila</h1>
     <select id="gameSelect">
         <option value="" disabled selected>Selezionare un gioco</option>
-        <option value="f1-free">Simulatore F1 - gratuito</option>
-        <option value="f1-premium">Simulatore F1 - premium</option>
+        <option>Simulatore F1 - gratuito</option>
+        <option>Simulatore F1 - premium</option>
     </select>
-    <h1>Numero corrente: <span id="currentNumber">0</span></h1>
-    <h1>Numero totale: <span id="totalNumber">0</span></h1>
+    <h1>Numero corrente: <span id="currentPlayer">0</span></h1>
+    <h1>Numero totale: <span id="totalPlayers">0</span></h1>
     <button id="nextBtn">➡️ Prossimo</button>
+    <button class="reset" id="updateBtn">🔁 Aggiorna</button>
     <button class="reset" id="resetBtn">🔁 Reset</button>
   </div>
 
@@ -109,58 +110,64 @@
     const backendUrl = "https://gamersarena-queue-managment.onrender.com";
     const socket = io(backendUrl);
     const gameSelect = document.getElementById("gameSelect");
-    const currentNumber = document.getElementById("currentNumber");
-    const totalNumber = document.getElementById("totalNumber");
+    const currentPlayer = document.getElementById("currentPlayer");
+    const totalPlayers = document.getElementById("totalPlayers");
     const nextBtn = document.getElementById("nextBtn");
+    const updateBtn = document.getElementById("updateBtn");
     const resetBtn = document.getElementById("resetBtn");
 
     async function loadStatus() {
         const game = gameSelect.value;
 
         if (!game) {
-            // Nascondi numeri e bottoni se il placeholder è selezionato
-            currentNumber.parentElement.style.display = "none";
-            totalNumber.parentElement.style.display = "none";
+            currentPlayer.parentElement.style.display = "none";
+            totalPlayers.parentElement.style.display = "none";
             nextBtn.style.display = "none";
+            updateBtn.style.display = "none";
             resetBtn.style.display = "none";
             return;
         }
 
-        // Mostra numeri e bottoni
-        currentNumber.parentElement.style.display = "block";
-        totalNumber.parentElement.style.display = "block";
+        currentPlayer.parentElement.style.display = "block";
+        totalPlayers.parentElement.style.display = "block";
         nextBtn.style.display = "inline-block";
+        updateBtn.style.display = "inline-block";
         resetBtn.style.display = "inline-block";
 
         const res = await fetch(`${backendUrl}/api/queue/status?game=${game}`);
         const data = await res.json();
-        currentNumber.textContent = data.currentNumber;
-        totalNumber.textContent = data.lastNumber;
+        currentPlayer.textContent = data.currentPlayer;
+        totalPlayers.textContent = data.TotalPlayers;
     }
 
     async function nextNumber() {
         const game = gameSelect.value;
         if (!game) return;
-        await fetch(`${backendUrl}/api/queue/next?game=${game}`, { method: "POST" });
+        const res = await fetch(`${backendUrl}/api/queue/next?game=${game}`, { method: "POST" });
+        const data = await res.json();
+        currentPlayer.textContent = data.currentPlayer;
     }
 
     async function resetQueue() {
         const game = gameSelect.value;
         if (!game) return;
-        await fetch(`${backendUrl}/api/queue/reset?game=${game}`, { method: "POST" });
+        const res = await fetch(`${backendUrl}/api/queue/reset?game=${game}`, { method: "POST" });
+        const data = await res.json();
+        currentPlayer.textContent = data.currentPlayer;
+        totalPlayers.textContent = data.TotalPlayers;
     }
 
-    socket.on("queueUpdate", data => {
-        if (data.game === gameSelect.value) {
-            currentNumber.textContent = data.currentNumber;
-            totalNumber.textContent = data.lastNumber;
-        }
+    socket.on("newPlayer", data => {
+      if (data.game === gameTitle.textContent) {
+        totalNumber.textContent = data.currentPlayer;
+      }
     });
 
     loadStatus();
 
     gameSelect.addEventListener("change", loadStatus);
     nextBtn.onclick = nextNumber;
+    updateBtn.onclick = loadStatus;
     resetBtn.onclick = resetQueue;
   </script>
 </body>

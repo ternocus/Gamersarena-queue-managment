@@ -121,7 +121,7 @@
         });
         const data = await res.json();
         userNumber.textContent = data.number;
-        totalNumber.textContent = data.currentNumber;
+        totalNumber.textContent = data.currentPlayer;
       } catch(e) {
         console.error("Errore nel caricamento dello stato:", e);
       }
@@ -131,7 +131,7 @@
       try {
         const res = await fetch(`${backendUrl}/api/queue/status?game=${gameTitle.textContent}`);
         const data = await res.json();
-        totalNumber.textContent = data.lastNumber;
+        totalNumber.textContent = data.currentPlayer;
       } catch(e) {
         console.error("Errore nel caricamento dello stato:", e);
       }
@@ -141,7 +141,7 @@
 
     socket.on("queueUpdate", data => {
       if (data.game === gameTitle.textContent) {
-        totalNumber.textContent = data.lastNumber;
+        totalNumber.textContent = data.currentPlayer;
       }
     });
   </script>

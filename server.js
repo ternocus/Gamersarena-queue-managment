@@ -26,7 +26,8 @@ app.post("/api/queue/join", (req, res) => {
 
   const q = getQueue(game);
   q.TotalPlayers++;
-  res.json({ game, number: q.TotalPlayers, currentPlayer: q.currentPlayer });
+  io.emit("newPlayer", { game, totalPlayers: q.TotalPlayers });
+  res.json({ game, userNumber: q.TotalPlayers, currentPlayer: q.currentPlayer });
 });
 
 // /api/queue/next?game=fs25
