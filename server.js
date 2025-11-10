@@ -10,11 +10,11 @@ app.use(express.json());
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-const queues = {}; // { [gameName]: { currentNumber, lastNumber } }
+const queues = {};
 
 function getQueue(game) {
   if (!queues[game]) {
-    queues[game] = { currentNumber: 0, lastNumber: 0 };
+    queues[game] = { currentPlayer: 0, TotalPlayers: 0 };
   }
   return queues[game];
 }
@@ -25,8 +25,8 @@ app.post("/api/queue/join", (req, res) => {
   if (!game) return res.status(400).json({ error: "Parametro 'game' mancante" });
 
   const q = getQueue(game);
-  q.lastNumber++;
-  res.json({ game, number: q.lastNumber, currentNumber: q.currentNumber });
+  q.TotalPlayers++;
+  res.json({ game, number: q.TotalPlayers, currentPlayer: q.currentPlayer });
 });
 
 // /api/queue/next?game=fs25
@@ -35,9 +35,9 @@ app.post("/api/queue/next", (req, res) => {
   if (!game) return res.status(400).json({ error: "Parametro 'game' mancante" });
 
   const q = getQueue(game);
-  q.currentNumber++;
-  io.emit("queueUpdate", { game, currentNumber: q.currentNumber });
-  res.json({ game, currentNumber: q.currentNumber });
+  q.currentPlayer++;
+  io.emit("queueUpdate", { game, currentPlayer: q.currentPlayer });
+  res.json({ game, currentPlayer: q.currentPlayer });
 });
 
 // /api/queue/status?game=fs25
@@ -55,11 +55,11 @@ app.post("/api/queue/reset", (req, res) => {
   if (!game) return res.status(400).json({ error: "Parametro 'game' mancante" });
 
   const q = getQueue(game);
-  q.currentNumber = 0;
-  q.lastNumber = 0;
+  q.currentPlayer = 0;
+  q.TotalPlayers = 0;
 
-  io.emit("queueUpdate", { game, currentNumber: 0, reset: true });
-  res.json({ game, currentNumber: 0, lastNumber: 0 });
+  io.emit("queueUpdate", { game, currentPlayer: 0, reset: true });
+  res.json({ game, currentPlayer: 0, TotalPlayers: 0 });
 });
 
 io.on("connection", socket => {
