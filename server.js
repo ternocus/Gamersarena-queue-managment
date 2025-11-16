@@ -111,6 +111,17 @@ app.get("/api/sheet/search", async (req, res) => {
   }
 });
 
+// /api/tournament/all
+app.get("/api/tournament/all", (req, res) => {
+  res.json([
+    "Mario Kart World",
+    "Fifa 25",
+    "Tekken",
+    "Just Dance",
+    "Dragonball"
+  ]);
+});
+
 io.on("connection", socket => {
   console.log("✅ Client connesso");
 });
